@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Letter of Gratitude — Sir Jaymar</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #0f2044;
+    --navy-light: #1a3460;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --gold-pale: #f5e4b0;
+    --white: #ffffff;
+    --off-white: #f8f5ee;
+    --text-dim: #a0b4cc;
+    --card-bg: rgba(255,255,255,0.045);
+    --card-border: rgba(201,168,76,0.22);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ─── CANVAS BACKGROUND ─── */
+  #bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+  }
+
+  #screen-letter { display: flex; }
+  #screen-messages { display: none; opacity: 0; }
+
+  /* ─── HEADER BADGE ─── */
+  .research-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid var(--card-border);
+    border-radius: 100px;
+    padding: 8px 20px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 36px;
+    animation: fadeSlideDown 0.8s ease both;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 8px var(--gold);
+    animation: pulse 2s infinite;
+  }
+
+  /* ─── TITLE ─── */
+  .letter-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.15;
+    margin-bottom: 8px;
+    animation: fadeSlideDown 0.9s 0.15s ease both;
+  }
+  .letter-title span {
+    background: linear-gradient(135deg, var(--gold-pale), var(--gold), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-style: italic;
+  }
+
+  .letter-subtitle {
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeSlideDown 1s 0.25s ease both;
+  }
+
+  /* ─── LETTER CARD ─── */
+  .letter-card {
+    max-width: 780px;
+    width: 100%;
+    background: linear-gradient(145deg, rgba(26,52,96,0.55), rgba(10,22,40,0.7));
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 52px 56px;
+    backdrop-filter: blur(18px);
+    box-shadow:
+      0 0 0 1px rgba(201,168,76,0.06) inset,
+      0 40px 80px rgba(0,0,0,0.45),
+      0 0 60px rgba(201,168,76,0.06);
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 1s 0.35s ease both;
+  }
+
+  .letter-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+  }
+
+  .corner-ornament {
+    position: absolute;
+    width: 80px; height: 80px;
+    opacity: 0.12;
+  }
+  .corner-ornament.tl { top: 16px; left: 16px; }
+  .corner-ornament.br { bottom: 16px; right: 16px; transform: rotate(180deg); }
+
+  .salutation {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.45rem;
+    font-weight: 600;
+    color: var(--gold-light);
+    margin-bottom: 24px;
+    letter-spacing: 0.02em;
+  }
+
+  .letter-body {
+    font-size: 15.5px;
+    line-height: 1.9;
+    color: rgba(255,255,255,0.88);
+    font-weight: 300;
+  }
+  .letter-body p { margin-bottom: 18px; }
+  .letter-body p:last-child { margin-bottom: 0; }
+
+  .highlight-phrase {
+    color: var(--gold-light);
+    font-weight: 500;
+  }
+
+  .letter-signature {
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(201,168,76,0.15);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--gold-pale);
+    text-align: right;
+  }
+
+  /* ─── CTA BUTTON ─── */
+  .cta-wrap {
+    margin-top: 44px;
+    animation: fadeUp 1s 0.55s ease both;
+  }
+
+  .cta-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--gold) 0%, #b8922a 50%, var(--gold-light) 100%);
+    background-size: 200% 200%;
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 16px 38px;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow:
+      0 8px 32px rgba(201,168,76,0.35),
+      0 2px 8px rgba(0,0,0,0.3);
+    animation: shimmer-bg 3s ease infinite;
+    overflow: hidden;
+  }
+
+  .cta-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 100px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.25), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .cta-btn:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow:
+      0 16px 48px rgba(201,168,76,0.5),
+      0 4px 12px rgba(0,0,0,0.3);
+  }
+  .cta-btn:hover::after { opacity: 1; }
+  .cta-btn:active { transform: translateY(0) scale(0.98); }
+
+  .btn-arrow {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+  .cta-btn:hover .btn-arrow { transform: translateX(4px); }
+
+  /* ─── SCREEN 2: MESSAGES ─── */
+  #screen-messages {
+    flex-direction: column;
+    padding: 80px 24px;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .section-eyebrow {
+    font-size: 10.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .eyebrow-line {
+    width: 32px; height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .section-title em {
+    font-style: italic;
+    background: linear-gradient(135deg, var(--gold-pale), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── MESSAGE CARDS GRID ─── */
+  .messages-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    max-width: 900px;
+    width: 100%;
+    margin-bottom: 64px;
+  }
+
+  @media (max-width: 640px) {
+    .messages-grid { grid-template-columns: 1fr; }
+  }
+
+  .msg-card {
+    background: linear-gradient(145deg, rgba(26,52,96,0.5), rgba(10,22,40,0.65));
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 36px 32px;
+    backdrop-filter: blur(14px);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    opacity: 0;
+    transform: translateY(30px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    /* Fixed dimensions so cards never shift size */
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .msg-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,168,76,0.3);
+  }
+
+  .msg-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.6;
+  }
+
+  .msg-card::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.08), transparent);
+  }
+
+  .quote-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 4rem;
+    line-height: 0.5;
+    color: var(--gold);
+    opacity: 0.25;
+    display: block;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+  }
+
+  .msg-text {
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 0;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .msg-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--gold-light);
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+  .author-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* ─── STUDENT NUMBER BADGE ─── */
+  .student-num {
+    position: absolute;
+    top: 24px; right: 24px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold-light);
+  }
+
+  /* ─── FINAL MESSAGE ─── */
+  .final-message {
+    max-width: 700px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease;
+  }
+  .final-message.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .final-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 36px;
+  }
+  .divider-line {
+    height: 1px;
+    width: 60px;
+    background: linear-gradient(90deg, transparent, var(--gold));
+    opacity: 0.5;
+  }
+  .divider-line.r { background: linear-gradient(90deg, var(--gold), transparent); }
+  .divider-star {
+    color: var(--gold);
+    font-size: 16px;
+  }
+
+  .final-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.15rem, 3vw, 1.6rem);
+    font-style: italic;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 28px;
+  }
+  .final-quote strong {
+    color: var(--gold-light);
+    font-style: normal;
+  }
+
+  .final-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--gold-light);
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── SCROLL PROGRESS ─── */
+  .scroll-hint {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .scroll-hint.show { opacity: 0.6; }
+  .scroll-mouse {
+    width: 22px; height: 36px;
+    border: 1.5px solid var(--text-dim);
+    border-radius: 12px;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding-top: 6px;
+  }
+  .scroll-wheel {
+    width: 3px; height: 7px;
+    background: var(--text-dim);
+    border-radius: 3px;
+    animation: scrollWheel 1.6s infinite;
+  }
+
+  /* ─── RESEARCH METADATA FOOTER ─── */
+  .research-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 64px;
+    opacity: 0;
+    animation: fadeUp 1s 0.6s ease both;
+  }
+  .meta-chip {
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    text-transform: uppercase;
+  }
+  .meta-chip::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.6;
+  }
+
+  /* ─── KEYFRAMES ─── */
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; box-shadow: 0 0 6px var(--gold); }
+    50%      { opacity: 0.6; box-shadow: 0 0 14px var(--gold); }
+  }
+  @keyframes scrollWheel {
+    0%   { opacity: 1; transform: translateY(0); }
+    80%  { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 0; transform: translateY(0); }
+  }
+  @keyframes shimmer-bg {
+    0%,100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+  @keyframes cardReveal {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes screenFadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    .letter-card { padding: 36px 28px; }
+    .messages-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- ══════════════════════════════════ SCREEN 1: LETTER ══════════════════════════════════ -->
+<section id="screen-letter" class="screen">
+  <div class="research-badge">
+    <span class="badge-dot"></span>
+    A Message of Gratitude &nbsp;·&nbsp; Practical Research Class
+  </div>
+
+  <h1 class="letter-title">
+    For Our <span>Guide & Mentor</span>
+  </h1>
+  <p class="letter-subtitle">Adviser &nbsp;·&nbsp; Practical Research Teacher &nbsp;·&nbsp; The One Who Pushed Us Further</p>
+
+  <div class="letter-card">
+    <!-- Corner ornaments -->
+    <svg class="corner-ornament tl" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 40 Q4 76 40 76" stroke="#c9a84c" stroke-width="1.5" fill="none"/>
+      <circle cx="4" cy="4" r="3" fill="#c9a84c"/>
+      <path d="M16 4 L16 28 Q16 64 52 64" stroke="#c9a84c" stroke-width="0.8" fill="none" opacity="0.5"/>
+    </svg>
+    <svg class="corner-ornament br" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 40 Q4 76 40 76" stroke="#c9a84c" stroke-width="1.5" fill="none"/>
+      <circle cx="4" cy="4" r="3" fill="#c9a84c"/>
+      <path d="M16 4 L16 28 Q16 64 52 64" stroke="#c9a84c" stroke-width="0.8" fill="none" opacity="0.5"/>
+    </svg>
+
+    <div class="salutation">Dear Sir Jaymar,</div>
+
+    <div class="letter-body">
+      <p>Bilang adviser at Practical Research teacher namin, <span class="highlight-phrase">hindi lang po kayo nagturo</span> — kayo rin po ang naging gabay namin sa isa sa pinakamahirap na bahagi ng pagiging estudyante namin. Sa bawat research, revisions, at preparation, nandiyan po kayo para gumabay at magturo kung paano namin maayos na gawin ang aming trabaho.</p>
+
+      <p>Hindi po naging madali ang proseso. Maraming beses kaming nalito, nahirapan, at halos sumuko. Lalo na nung dumating ang defense — sa totoo lang po, Sir, nung time na yun, <span class="highlight-phrase">hindi ko na po kilala sarili ko sa sobrang kaba.</span> Pero dahil po sa mga tinuro ninyo at sa paghahanda na ginawa ninyo sa amin, kinaya namin at nalagpasan namin iyon.</p>
+
+      <p>Salamat po sa walang sawang pag-guide, sa pag-correct ng mga mali namin, at sa <span class="highlight-phrase">pag-push sa amin na pagbutihin pa lalo</span> ang gawa namin. Kahit minsan paulit-ulit ang revisions at nakakapagod na, alam namin na ginagawa niyo iyon para mas maging maayos at mas matuto kami.</p>
+
+      <p>Hindi lang po kami natuto gumawa ng research — <span class="highlight-phrase">natuto rin po kaming maging mas responsable, mas maingat, at mas determinado</span> sa mga ginagawa namin.</p>
+
+      <p>Sir, malaking parte po kayo ng journey namin. Hindi po namin makakalimutan ang lahat ng effort, oras, at pasensya na ibinigay ninyo sa amin.</p>
+
+      <p><em>Maraming salamat po sa lahat.</em></p>
+    </div>
+
+    <div class="letter-signature">— Jared Gonzales</div>
+  </div>
+
+  <div class="research-meta">
+    <span class="meta-chip">Academic Year 2024–2025</span>
+    <span class="meta-chip">Practical Research</span>
+    <span class="meta-chip">With Deep Appreciation</span>
+  </div>
+
+  <div class="cta-wrap">
+    <button class="cta-btn" onclick="transitionToMessages()">
+      Read Our Messages
+      <span class="btn-arrow">→</span>
+    </button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════ SCREEN 2: MESSAGES ══════════════════════════════════ -->
+<section id="screen-messages" class="screen">
+
+  <div class="section-header">
+    <div class="section-eyebrow">
+      <span class="eyebrow-line"></span>
+      Student Testimonials
+      <span class="eyebrow-line r"></span>
+    </div>
+    <h2 class="section-title">
+      Words From <em>the Heart</em>
+    </h2>
+  </div>
+
+  <div class="messages-grid">
+
+    <div class="msg-card" id="card-1">
+      <span class="student-num">01</span>
+      <span class="quote-mark">"</span>
+      <p class="msg-text">Sir, salamat po sa pag-guide sa amin sa research kahit ang dami naming revisions.</p>
+      <div class="msg-author">
+        <span class="author-dot"></span>
+        Jared
+      </div>
+    </div>
+
+    <div class="msg-card" id="card-2">
+      <span class="student-num">02</span>
+      <span class="quote-mark">"</span>
+      <p class="msg-text">Dahil po sa inyo, mas naintindihan ko kung paano gumawa ng research.</p>
+      <div class="msg-author">
+        <span class="author-dot"></span>
+        Hubert
+      </div>
+    </div>
+
+    <div class="msg-card" id="card-3">
+      <span class="student-num">03</span>
+      <span class="quote-mark">"</span>
+      <p class="msg-text">Sir Jaymar, salamat po sa pagiging mabuting adviser at teacher. Malaki po ang naging impact ninyo sa amin.</p>
+      <div class="msg-author">
+        <span class="author-dot"></span>
+       Rizza
+      </div>
+    </div>
+
+    <div class="msg-card" id="card-4">
+      <span class="student-num">04</span>
+      <span class="quote-mark">"</span>
+      <p class="msg-text">Thank you po sa patience niyo sa amin kahit paulit-ulit kami nagkakamali.</p>
+      <div class="msg-author">
+        <span class="author-dot"></span>
+        Daisy
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Final Message -->
+  <div class="final-message" id="final-msg">
+    <div class="final-divider">
+      <span class="divider-line"></span>
+      <span class="divider-star">✦</span>
+      <span class="divider-line r"></span>
+    </div>
+
+    <p class="final-quote">
+      "Because of you, we learned not just how to complete a research,<br>
+      but how to <strong>overcome challenges</strong> and <strong>believe in ourselves.</strong>"
+    </p>
+
+    <div class="final-name">Thank you, Sir Jaymar.</div>
+  </div>
+
+</section>
+
+<script>
+/* ─── ANIMATED STARFIELD BACKGROUND ─── */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, stars = [], lines = [], nodes = [];
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Stars
+for (let i = 0; i < 120; i++) {
+  stars.push({
+    x: Math.random(), y: Math.random(),
+    r: Math.random() * 1.4 + 0.3,
+    a: Math.random(),
+    da: (Math.random() - 0.5) * 0.008,
+    s: Math.random() * 0.00015
+  });
+}
+
+// Research network nodes
+for (let i = 0; i < 12; i++) {
+  nodes.push({
+    x: Math.random(), y: Math.random(),
+    vx: (Math.random() - 0.5) * 0.0004,
+    vy: (Math.random() - 0.5) * 0.0004,
+    r: Math.random() * 2 + 1.5
+  });
+}
+
+function drawBg(t) {
+  ctx.clearRect(0, 0, W, H);
+
+  // Deep gradient
+  const grad = ctx.createRadialGradient(W*0.5, H*0.35, 0, W*0.5, H*0.5, H*0.9);
+  grad.addColorStop(0, '#0f2044');
+  grad.addColorStop(0.5, '#091832');
+  grad.addColorStop(1, '#050e1d');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle gold glow center
+  const glow = ctx.createRadialGradient(W*0.5, H*0.42, 0, W*0.5, H*0.42, W*0.35);
+  glow.addColorStop(0, 'rgba(201,168,76,0.05)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  // Stars
+  stars.forEach(s => {
+    s.a += s.da;
+    if (s.a > 1 || s.a < 0) s.da *= -1;
+    s.x += s.s; if (s.x > 1) s.x = 0;
+    ctx.beginPath();
+    ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,255,255,${s.a * 0.7})`;
+    ctx.fill();
+  });
+
+  // Research graph nodes + lines
+  nodes.forEach(n => {
+    n.x += n.vx; n.y += n.vy;
+    if (n.x < 0 || n.x > 1) n.vx *= -1;
+    if (n.y < 0 || n.y > 1) n.vy *= -1;
+  });
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i+1; j < nodes.length; j++) {
+      const dx = (nodes[i].x - nodes[j].x)*W;
+      const dy = (nodes[i].y - nodes[j].y)*H;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < W * 0.22) {
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x*W, nodes[i].y*H);
+        ctx.lineTo(nodes[j].x*W, nodes[j].y*H);
+        ctx.strokeStyle = `rgba(201,168,76,${0.12 * (1 - dist/(W*0.22))})`;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+      }
+    }
+  }
+  nodes.forEach(n => {
+    ctx.beginPath();
+    ctx.arc(n.x*W, n.y*H, n.r, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(201,168,76,0.25)';
+    ctx.fill();
+  });
+
+  requestAnimationFrame(drawBg);
+}
+requestAnimationFrame(drawBg);
+
+/* ─── SCREEN TRANSITION ─── */
+function transitionToMessages() {
+  const s1 = document.getElementById('screen-letter');
+  const s2 = document.getElementById('screen-messages');
+
+  // Fade out screen 1
+  s1.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  s1.style.opacity = '0';
+  s1.style.transform = 'translateY(-24px)';
+
+  setTimeout(() => {
+    s1.style.display = 'none';
+    s2.style.display = 'flex';
+    window.scrollTo(0, 0);
+
+    // Animate screen 2 in
+    setTimeout(() => {
+      s2.style.transition = 'opacity 0.7s ease';
+      s2.style.opacity = '1';
+      s2.style.animation = 'screenFadeIn 0.7s ease both';
+
+      // Stagger the cards
+      const cards = document.querySelectorAll('.msg-card');
+      cards.forEach((c, i) => {
+        setTimeout(() => {
+          c.style.animation = `cardReveal 0.65s ease both`;
+          c.style.opacity = '1';
+          c.style.transform = 'translateY(0)';
+        }, i * 180 + 200);
+      });
+
+      // Final message after all cards
+      setTimeout(() => {
+        document.getElementById('final-msg').classList.add('visible');
+      }, cards.length * 180 + 800);
+
+    }, 50);
+  }, 650);
+}
+</script>
+</body>
+</html>
